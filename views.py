@@ -7,7 +7,7 @@
 from flask import Flask, request, send_from_directory
 import json
 from util import util
-from service import service
+from service import service, job, enterprise, user
 from message import msg
 from sms import sms
 import config
@@ -44,10 +44,7 @@ def get_token():
     data = json.loads(request.data)
     r = service.get_token(data['phone'], data['password'])
     if r is not None:
-        if r['appliable'] == 0:
-            r['appliable'] = False
-        else:
-            r['appliable'] = True
+        r['appliable'] = False if r['appliable'] == 0 else True
         return make_success(r)
     return make_error(msg.WRONG_ACCOUNT)
 
@@ -95,20 +92,18 @@ def change_location():
 def get_jobs():
     start_id = int(request.args.get('start_id', -1))
     city_id = int(request.args.get('city_id', 0))
-    if request.args.get('type', '') == 'all':
-        if start_id == -1:
-            res = service.refresh_all_jobs(city_id)
-            return make_success(res)
-        else:
-            res = service.get_all_jobs(start_id, city_id)
-            return make_success(res)
-    elif request.args.get('type', '') == 'hot':
-        if start_id == -1:
-            res = service.refresh_hot_jobs(city_id)
-            return make_success(res)
-        else:
-            res = service.get_hot_jobs(start_id, city_id)
-            return make_success(res)
+    q_type = request.args.get('type', '')
+    if q_type == 'all':
+        return make_success(job.get_all_jobs(city_id=city_id, start_id=start_id))
+    elif q_type == 'hot':
+        return make_success(job.get_hot_jobs(city_id=city_id, limit_start=start_id))
+    elif q_type == 'nearby':
+        lat = float(request.args.get('lat', 0))
+        lng = float(request.args.get('lng', 0))
+        return make_success(job.get_nearby_jobs(city_id=city_id, lat=lat, lng=lng, limit_start=start_id))
+    elif q_type == 'search':
+        return make_success(
+            job.search_job(city_id=city_id, job_name=request.args.get('query', ''), limit_start=start_id))
     return make_error('no more data')
 
 
@@ -116,20 +111,18 @@ def get_jobs():
 def get_enters():
     start_id = int(request.args.get('start_id', -1))
     city_id = int(request.args.get('city_id', 0))
-    if request.args.get('type', '') == 'all':
-        if start_id == -1:
-            res = service.refresh_all_enters(city_id)
-            return make_success(res)
-        else:
-            res = service.get_all_enters(start_id, city_id)
-            return make_success(res)
-    elif request.args.get('type', '') == 'hot':
-        if start_id == -1:
-            res = service.refresh_hot_enters(city_id)
-            return make_success(res)
-        else:
-            res = service.get_hot_enters(start_id, city_id)
-            return make_success(res)
+    q_type = request.args.get('type', '')
+    if q_type == 'all':
+        return make_success(enterprise.get_all_enters(city_id=city_id, limit_start=start_id))
+    elif q_type == 'hot':
+        return make_success(enterprise.get_hot_enters(city_id=city_id, limit_start=start_id))
+    elif q_type == 'nearby':
+        lat = request.args.get('lat', 0)
+        lng = request.args.get('lng', 0)
+        return make_success(enterprise.get_nearby_enters(city_id=city_id, limit_start=start_id, lat=lat, lng=lng))
+    elif q_type == 'search':
+        return make_success(
+            enterprise.search_enters(city_id=city_id, enter_name=request.args.get('query', ''), limit_start=start_id))
     return make_error('no more data')
 
 

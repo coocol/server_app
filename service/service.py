@@ -226,10 +226,6 @@ def get_hot_enters(start_id, city_id):
     return r
 
 
-def refresh_hot_enters(city_id):
-    return None
-
-
 if __name__ == '__main__':
     print refresh_all_jobs(0)
 
