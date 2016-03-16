@@ -13,6 +13,19 @@ def _convert_time(func):
     return wrapper
 
 
+def get_job_info(job_id):
+    sql = 'select ' \
+          'j.id, j.name, j.address, j.time, j.apply, j.collect, j.company as companyId, ' \
+          'j.content, j.requirement, j.period, j.salary, j.other, c.name as company ,c.nick ' \
+          'from job as j ' \
+          'join company_info as c ' \
+          'on j.company = c.company and j.id = %s;' % job_id
+    r = _db.query_one(sql)
+    if r is not None:
+        r['time'] = unicode(r['time'])[0: 10]
+    return r
+
+
 @_convert_time
 def get_all_jobs(city_id, start_id):
     sql_where_city = '' if city_id == 0 else 'and j.city = %s ' % city_id

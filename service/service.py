@@ -78,152 +78,152 @@ def modify_user_settings(uid, values):
     db.update(table='user_settings', conditions={'user': uid}, values=values)
 
 
-def refresh_all_jobs(city_id):
-    if city_id == 0:
-        sql = 'select ' \
-              'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company, c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company ' \
-              'order by id desc limit 10;'
-    else:
-        sql = 'select ' \
-              'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company, c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company and j.city = %s order by id desc limit 10;' % city_id
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def refresh_hot_jobs(city_id):
-    if city_id == 0:
-        sql = 'select ' \
-              'j.id, j.name, j.address, j.time, j.apply, j.company as companyId , c.name as company, c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company ' \
-              'order by j.apply desc limit 10;'
-    else:
-        sql = 'select ' \
-              'j.id, j.name, j.address, j.time, j.apply, j.company as companyId , c.name as company ,c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company and j.city = %s order by j.apply desc limit 10;' % city_id
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def get_all_jobs(start_id, city_id):
-    if city_id == 0:
-        sql = 'select ' \
-              'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company, c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company and j.id < %s order by id desc limit 10;' % start_id
-    else:
-        sql = 'select ' \
-              'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company and j.id < %s and j.city = %s order by id desc limit 10;' % (start_id, city_id)
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def get_hot_jobs(start_id, city_id):
-    if city_id == 0:
-        sql = 'select * from (select ' \
-              'j.id, j.name, j.address, j.time, j.company as companyId ,j.apply, c.name as company , c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company order by j.apply desc) as r limit %s, 10;' % start_id
-    else:
-        sql = 'select * from (select ' \
-              'j.id, j.name, j.address, j.time, j.company as companyId ,j.apply, c.name as company ,c.nick ' \
-              'from job as j ' \
-              'join company_info as c ' \
-              'on j.company = c.company and j.city = %s order by j.apply desc) as r limit %s, 10;' % (city_id, start_id)
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def refresh_all_enters(city_id):
-    if city_id == 0:
-        sql = 'select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
-              'from company_info as e ' \
-              'order by id desc limit 10;'
-    else:
-        sql = 'select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
-              'from company_info as e where e.city = %s order by id desc limit 10;' % city_id
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def get_all_enters(start_id, city_id):
-    if city_id == 0:
-        sql = 'select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
-              'from company_info as e where e.id < %s order by id desc limit 10;' % start_id
-    else:
-        sql = 'select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
-              'from company_info as e where e.id < %s and e.city = %s order by id desc limit 10;' % (start_id, city_id)
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def refresh_hot_enters(city_id):
-    if city_id == 0:
-        sql = 'select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
-              'from company_info as e ' \
-              'order by e.apply desc limit 10;'
-    else:
-        sql = 'select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
-              'from company_info as e where e.city = %s order by e.apply desc limit 10;' % city_id
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
-
-
-def get_hot_enters(start_id, city_id):
-    if city_id == 0:
-        sql = 'select * from (select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
-              'from company_info as e order by e.apply desc) as r limit %s,10;' % start_id
-    else:
-        sql = 'select * from (select ' \
-              'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
-              'from company_info as e where e.city = %s order by e.apply desc) as r limit %s, 10;' % (city_id, start_id)
-    r = db.query(sql)
-    if r is not None:
-        for item in r:
-            item['time'] = unicode(item['time'])[0: 16]
-    return r
+# def refresh_all_jobs(city_id):
+#     if city_id == 0:
+#         sql = 'select ' \
+#               'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company, c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company ' \
+#               'order by id desc limit 10;'
+#     else:
+#         sql = 'select ' \
+#               'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company, c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company and j.city = %s order by id desc limit 10;' % city_id
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def refresh_hot_jobs(city_id):
+#     if city_id == 0:
+#         sql = 'select ' \
+#               'j.id, j.name, j.address, j.time, j.apply, j.company as companyId , c.name as company, c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company ' \
+#               'order by j.apply desc limit 10;'
+#     else:
+#         sql = 'select ' \
+#               'j.id, j.name, j.address, j.time, j.apply, j.company as companyId , c.name as company ,c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company and j.city = %s order by j.apply desc limit 10;' % city_id
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def get_all_jobs(start_id, city_id):
+#     if city_id == 0:
+#         sql = 'select ' \
+#               'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company, c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company and j.id < %s order by id desc limit 10;' % start_id
+#     else:
+#         sql = 'select ' \
+#               'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company and j.id < %s and j.city = %s order by id desc limit 10;' % (start_id, city_id)
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def get_hot_jobs(start_id, city_id):
+#     if city_id == 0:
+#         sql = 'select * from (select ' \
+#               'j.id, j.name, j.address, j.time, j.company as companyId ,j.apply, c.name as company , c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company order by j.apply desc) as r limit %s, 10;' % start_id
+#     else:
+#         sql = 'select * from (select ' \
+#               'j.id, j.name, j.address, j.time, j.company as companyId ,j.apply, c.name as company ,c.nick ' \
+#               'from job as j ' \
+#               'join company_info as c ' \
+#               'on j.company = c.company and j.city = %s order by j.apply desc) as r limit %s, 10;' % (city_id, start_id)
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def refresh_all_enters(city_id):
+#     if city_id == 0:
+#         sql = 'select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
+#               'from company_info as e ' \
+#               'order by id desc limit 10;'
+#     else:
+#         sql = 'select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
+#               'from company_info as e where e.city = %s order by id desc limit 10;' % city_id
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def get_all_enters(start_id, city_id):
+#     if city_id == 0:
+#         sql = 'select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
+#               'from company_info as e where e.id < %s order by id desc limit 10;' % start_id
+#     else:
+#         sql = 'select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick ' \
+#               'from company_info as e where e.id < %s and e.city = %s order by id desc limit 10;' % (start_id, city_id)
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def refresh_hot_enters(city_id):
+#     if city_id == 0:
+#         sql = 'select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
+#               'from company_info as e ' \
+#               'order by e.apply desc limit 10;'
+#     else:
+#         sql = 'select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
+#               'from company_info as e where e.city = %s order by e.apply desc limit 10;' % city_id
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
+#
+#
+# def get_hot_enters(start_id, city_id):
+#     if city_id == 0:
+#         sql = 'select * from (select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
+#               'from company_info as e order by e.apply desc) as r limit %s,10;' % start_id
+#     else:
+#         sql = 'select * from (select ' \
+#               'e.id, e.company as companyId, e.name, e.address, e.time, e.nick, e.apply ' \
+#               'from company_info as e where e.city = %s order by e.apply desc) as r limit %s, 10;' % (city_id, start_id)
+#     r = db.query(sql)
+#     if r is not None:
+#         for item in r:
+#             item['time'] = unicode(item['time'])[0: 16]
+#     return r
 
 
 if __name__ == '__main__':

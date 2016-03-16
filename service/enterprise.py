@@ -55,3 +55,25 @@ def search_enters(city_id, enter_name, limit_start):
           'from company_info as e where (e.name like "%%%s%%" or e.nick like "%%%s%%") %s order by id desc limit %s 10;' % (
               enter_name, enter_name, sub_sql_where, sub_sql_limit)
     return _db.query(sql)
+
+
+def get_enter_info(enterprise_id):
+    sql = 'select ' \
+          'e.id, e.company as companyId, e.name, e.address, ' \
+          'e.time, e.nick, e.introduction, e.jobs, e.apply, e.collect ' \
+          'from company_info as e where e.company = %s' % enterprise_id
+    r = _db.query_one(sql)
+    if r is not None:
+        r['time'] = unicode(r['time'])[0: 10]
+    return r
+
+
+@_convert_time
+def get_enter_jobs(enterprise_id, start_id):
+    sql_where_id = '' if start_id < 1 else 'and j.id < %s' % start_id
+    sql = 'select ' \
+          'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
+          'from job as j ' \
+          'join company_info as c ' \
+          'on j.company = c.company and c.company = %s %s order by id desc limit 10;' % (enterprise_id, sql_where_id)
+    return _db.query(sql)

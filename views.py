@@ -39,6 +39,16 @@ def register():
         return make_success('')
 
 
+@app.route('/api/v1.0/user/<int:user_id>/header', methods=['GET'])
+def get_user_header(user_id):
+    if service.check_token(user_id, request.args.get('token', '')):
+        u = user.get_user_info(user_id)
+        if u is not None:
+            return make_success(u)
+        else:
+            return make_error('error id')
+
+
 @app.route('/api/v1.0/token', methods=['POST'])
 def get_token():
     data = json.loads(request.data)
@@ -124,6 +134,31 @@ def get_enters():
         return make_success(
             enterprise.search_enters(city_id=city_id, enter_name=request.args.get('query', ''), limit_start=start_id))
     return make_error('no more data')
+
+
+@app.route('/api/v1.0/job/<int:job_id>', methods=['GET'])
+def get_job_info(job_id):
+    r = job.get_job_info(job_id=job_id)
+    if r is not None:
+        return make_success(r)
+    return make_error('error id')
+
+
+@app.route('/api/v1.0/enterprise/<int:enterprise_id>', methods=['GET'])
+def get_enter_info(enterprise_id):
+    r = enterprise.get_enter_info(enterprise_id=enterprise_id)
+    if r is not None:
+        return make_success(r)
+    return make_error('error id')
+
+
+@app.route('/api/v1.0/enterprise/<int:enterprise_id>/jobs', methods=['GET'])
+def get_enter_jobs(enterprise_id):
+    start_id = int(request.args.get('start_id', -1))
+    r = enterprise.get_enter_jobs(enterprise_id=enterprise_id, start_id=start_id)
+    if r is not None:
+        return make_success(r)
+    return make_error('error id')
 
 
 @app.route('/api/v1.0/static/<path:path>')
