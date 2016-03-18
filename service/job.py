@@ -13,6 +13,55 @@ def _convert_time(func):
     return wrapper
 
 
+@_convert_time
+def get_user_jobs(user_id, start_id):
+    sql_limit = '' if start_id == -1 else '%s,' % start_id
+    sql = 'select ' \
+          'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
+          'from job as j ' \
+          'join apply_job as a on a.job = j.id and a.user = %s ' \
+          'join company_info as c on j.company = c.company order by a.id desc limit %s 10 ' % (user_id, sql_limit)
+    return _db.query(sql)
+
+
+@_convert_time
+def get_user_collect_jobs(user_id, start_id):
+    sql_where = '' if start_id == -1 else '%s,' % start_id
+    sql = 'select ' \
+          'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
+          'from job as j ' \
+          'join collect_job as a on a.job = j.id and a.user = %s ' \
+          'join company_info as c on j.company = c.company order by a.id desc limit %s 10 ' % (user_id, sql_where)
+    return _db.query(sql)
+
+
+def apply_job(user_id, job_id):
+    sql = 'select id from apply_job where user = %s and job = %s' % (user_id, job_id)
+    if _db.query_one(sql) is None:
+        _db.insert('apply_job', {'user': user_id, 'job': job_id})
+        _db.execute('update job set apply = apply + 1 where id = %s' % job_id)
+        r = _db.query_one('select company from job where id = %s' % job_id)
+        _db.execute('update company_info set apply = apply + 1 where company = %s' % r['company'])
+        return True
+    return False
+
+
+def collect_job(user_id, job_id):
+    sql = 'select id from collect_job where user = %s and job = %s' % (user_id, job_id)
+    if _db.query_one(sql) is None:
+        _db.insert('collect_job', {'user': user_id, 'job': job_id})
+        _db.execute('update job set collect = collect + 1 where id = %s' % job_id)
+        return True
+    return False
+
+
+def discollect(user_id, job_id):
+    sql = 'delete from collect_job where user = %s and job = %s' % (user_id, job_id)
+    _db.execute('update job set collect = collect - 1 where id = %s' % job_id)
+    _db.execute(sql)
+    return True
+
+
 def get_job_info(job_id):
     sql = 'select ' \
           'j.id, j.name, j.address, j.time, j.apply, j.collect, j.company as companyId, ' \
@@ -24,6 +73,14 @@ def get_job_info(job_id):
     if r is not None:
         r['time'] = unicode(r['time'])[0: 10]
     return r
+
+
+def get_user_job_status(job_id, user_id):
+    sql = 'select id from apply_job where job = %s and user = %s' % (job_id, user_id)
+    is_apply = True if _db.query_one(sql) is not None else False
+    sql = 'select id from collect_job where job = %s and user = %s' % (job_id, user_id)
+    is_collect = True if _db.query_one(sql) is not None else False
+    return {'apply': is_apply, 'collect': is_collect}
 
 
 @_convert_time
@@ -81,3 +138,12 @@ def search_job(city_id, job_name, limit_start):
     return _db.query(sql)
 
 
+@_convert_time
+def get_enter_jobs(enterprise_id, start_id):
+    sql_where_id = '' if start_id < 1 else 'and j.id < %s' % start_id
+    sql = 'select ' \
+          'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
+          'from job as j ' \
+          'join company_info as c ' \
+          'on j.company = c.company and c.company = %s %s order by id desc limit 10;' % (enterprise_id, sql_where_id)
+    return _db.query(sql)

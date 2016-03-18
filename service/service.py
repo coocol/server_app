@@ -45,7 +45,7 @@ def register_user(phone, password):
                % (token, util.bcrypt_password(password + salt), salt, phone))
     uid = db.query_one('select id from user where phone = %s' % phone)['id']
     db.insert('user_settings', {'user': uid})
-    db.insert('user_info', {'user': uid})
+    db.insert('user_info', {'user': uid, 'nick': phone})
 
 
 def check_code(phone, code):
