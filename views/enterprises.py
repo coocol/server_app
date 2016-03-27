@@ -34,6 +34,16 @@ def get_enter_info(enterprise_id):
     return _make_error('error id')
 
 
+@enters_app.route('/api/v1.0/enterprise/status/<int:user_id>', methods=['GET'])
+def get_collect_status(user_id):
+    if not service.check_token(user_id, request.args.get('token', '')):
+        return _make_error('error token')
+    if enterprise.is_enterprise_collected(user_id, int(request.args.get('enterprise_id', 0))):
+        return _make_success('yes')
+    else:
+        return _make_success('no')
+
+
 @enters_app.route('/api/v1.0/enterprise/<int:enterprise_id>/jobs', methods=['GET'])
 def get_enter_jobs(enterprise_id):
     start_id = int(request.args.get('start_id', -1))

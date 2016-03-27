@@ -14,10 +14,9 @@ def _convert_time(func):
     return wrapper
 
 
-@_convert_time
 def collect(user_id, enter_id):
     sql = 'select id from collect_enterprise where user = %s and company = %s' % (user_id, enter_id)
-    if _db.query_one(sql) is not None:
+    if _db.query_one(sql) is None:
         _db.insert('collect_enterprise', {'user': user_id, 'company': enter_id})
         return True
     return False
@@ -92,3 +91,8 @@ def get_enter_info(enterprise_id):
     if r is not None:
         r['time'] = unicode(r['time'])[0: 10]
     return r
+
+
+def is_enterprise_collected(user_id, enterprise_id):
+    sql = 'select id from collect_enterprise where user = %s and company = %s' % (user_id, enterprise_id)
+    return _db.query_one(sql) is not None

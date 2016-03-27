@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, request
+from flask import Blueprint, request, send_from_directory
 from service import service, user, job, enterprise
 import os
 import json
@@ -142,6 +142,33 @@ def update_resume(user_id):
     if not service.check_token(user_id, data['token']):
         return _make_error('error token')
     r = user.update_resume(user_id, data['field'], data['value'])
+    return _make_success('')
+
+
+@users_app.route('/api/v1.0/resume/file', methods=["GET"])
+def download_resume():
+    user_id = int(request.args.get('user_id', 0))
+    token = request.args.get('token', 0)
+    if not service.check_token(user_id, token):
+        return _make_error('error token')
+    return send_from_directory('static', 'resume/Resume_' + str(user_id) + '_' + request.args.get('name', ''))
+
+
+@users_app.route('/api/v1.0/notifications/<int:user_id>', methods=["GET"])
+def get_notifications(user_id):
+    token = request.args.get('token', '')
+    start_id = int(request.args.get('start_id', 0))
+    if not service.check_token(user_id, token):
+        return _make_error('error token')
+    return _make_success(user.get_notifications(user_id=user_id, start_id=start_id))
+
+
+@users_app.route('/api/v1.0/notifications/<int:user_id>', methods=["POST"])
+def delete_notifications(user_id):
+    data = json.loads(request.data)
+    if not service.check_token(user_id, data['token']):
+        return _make_error('error token')
+    user.delete_notifications(user_id=user_id, n_id=data['nid'])
     return _make_success('')
 
 

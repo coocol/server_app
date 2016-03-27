@@ -10,7 +10,7 @@ from flask import Flask, send_from_directory, request
 
 import config
 import os
-from service import service
+from service import service, user
 from views.enterprises import enters_app
 from views.jobs import jobs_app
 from views.users import users_app
@@ -41,7 +41,8 @@ def save_resume_doc(user_id):
     if not service.check_token(user_id, request.form['token']):
         return make_error('error_token')
     f = request.files['file']
-    f.save('static/resume/%s.pdf' % user_id)
+    f.save('static/resume/Resume_%s_%s' % (user_id, f.filename))
+    user.upload_resume(user_id, f.filename)
     return make_success('')
 
 
@@ -50,7 +51,7 @@ def save_resume_photo(user_id):
     if not service.check_token(user_id, request.form['token']):
         return make_error('error_token')
     f = request.files['file']
-    f.save('static/resume/%s.jpg' % user_id)
+    f.save('static/resume_photo/%s.jpg' % user_id)
     return make_success('')
 
 

@@ -17,7 +17,7 @@ def _convert_time(func):
 def get_user_jobs(user_id, start_id):
     sql_limit = '' if start_id == -1 else '%s,' % start_id
     sql = 'select ' \
-          'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick ' \
+          'j.id, j.name, j.address, j.time, j.company as companyId , c.name as company ,c.nick, a.status ' \
           'from job as j ' \
           'join apply_job as a on a.job = j.id and a.user = %s ' \
           'join company_info as c on j.company = c.company order by a.id desc limit %s 10 ' % (user_id, sql_limit)
